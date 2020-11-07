@@ -1,8 +1,8 @@
 <template>
   <div class="user-profile">
     <div class="user-profile_user-panel">
-      <h1 class="user-profile_username">@{{ user.username }}</h1>
-      <div class="user-profile_admin-badge" v-if="user.isAdmin">Admin</div>
+      <h1 class="user-profile_username">@{{ state.user.username }}_{{userId}}</h1>
+      <div class="user-profile_admin-badge" v-if="state.user.isAdmin">Admin</div>
 
       <div class="user-profile_follower-count">
         <strong>Followers: </strong> {{ followers }}
@@ -38,9 +38,9 @@
 
     <div class="user-profile_tweets-wrapper">
       <tweetItem
-        v-for="tweet in user.tweets"
+        v-for="tweet in state.user.tweets"
         :key="tweet.id"
-        :username="user.username"
+        :username="state.user.username"
         :tweet="tweet"
         @favourite="toggleFavourite"
       />
@@ -49,12 +49,30 @@
 </template>
 
 <script>
-2;
 
-import tweetItem from "./TweetItem";
+import tweetItem from "@/components/TweetItem";
+import { useRoute } from 'vue-router';
+import { reactive, computed } from 'vue';
+import { users } from '../assets/users.js'
+
 
 export default {
   name: "UserProfile",
+
+  setup() {
+    const route = useRoute();
+
+    const userId = computed(()=>route.params.userId);
+
+    const state = reactive({
+        user: users[userId.value-1] || users[0],
+    })
+
+    return {
+      userId,
+      state
+    }
+  },
 
   components: {
     tweetItem,
@@ -62,6 +80,7 @@ export default {
 
   data() {
     return {
+      //route: useRouter(),
       newTweetContent: "",
       selectedTweetType: "instant",
       tweetTypes: [
@@ -69,20 +88,6 @@ export default {
         { value: "instant", name: "Instant Tweet" },
       ],
       followers: 0,
-      user: {
-        id: 1,
-        username: "asif",
-        firstName: "Mahfujur",
-        lastname: "Rahman",
-        email: "asif@gmail.com",
-        isAdmin: true,
-        tweets: [
-          { id: 1, content: "Hello friends" },
-          { id: 2, content: "Something happened!" },
-          { id: 3, content: "Something else happened!!" },
-          { id: 4, content: "something else happened again!!!" },
-        ],
-      },
     };
   },
 
@@ -112,13 +117,13 @@ export default {
       console.log(`Favourited tweet #${id}`);
     },
     createNewTweet() {
-      console.log("ok");
+      console.log(this.state);
       console.log(this.newTweetContent);
       if (this.newTweetContent && this.selectedTweetType !== "draft") {
-        this.user.tweets.unshift({
-          id: this.user.tweets.length + 1,
+        this.state.user.tweets.unshift({
+          id: this.state.user.tweets.length + 1,
           content: this.newTweetContent,
-        });
+        }); 
       }
       this.newTweetContent = "";
     },
