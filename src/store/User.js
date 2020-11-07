@@ -7,7 +7,6 @@ export const UserModule = {
 
     mutations: {
         SET_USER(state, user) {
-            console.log("Setting user " + user)
             state.user = user;
         }
     },
